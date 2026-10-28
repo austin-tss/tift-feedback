@@ -23,7 +23,7 @@ function list(b){const want=P().getProperty('DASHBOARD_CODE');if(!want||String(b
  const rank={urgent:0,high:1,medium:2,low:3};rows.sort((a,b)=>((rank[a.severity]??4)-(rank[b.severity]??4))||(b.id-a.id));return{ok:true,rows:rows};}
 function classify(issue,text){const key=P().getProperty('GEMINI_API_KEY');if(!key)return{status:'pending'};
  const prompt='You triage community feedback for Tift County Schools (Georgia). Categories: '+CATS.join(', ')+'. Severities: '+SEVS.join(', ')+' (urgent = immediate safety risk to people). Submitter\'s chosen category: '+(issue||'none')+' — confirm or correct it. Reply JSON only: {"category":"...","severity":"...","reason":"one sentence"}.\n\nFeedback:\n'+text;
- try{const r=UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',{method:'post',contentType:'application/json',headers:{'x-goog-api-key':key},muteHttpExceptions:true,
+ try{const r=UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent',{method:'post',contentType:'application/json',headers:{'x-goog-api-key':key},muteHttpExceptions:true,
   payload:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{responseMimeType:'application/json'}})});
   if(r.getResponseCode()!==200)return{status:'pending',reason:'AI error '+r.getResponseCode()};
   const j=JSON.parse(JSON.parse(r.getContentText()).candidates[0].content.parts[0].text);
