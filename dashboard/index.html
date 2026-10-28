@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light"><meta name="robots" content="noindex">
+<title>Feedback Dashboard – Tift County Schools</title><link rel="stylesheet" href="../style.css"></head><body>
+<h1>Community Feedback Dashboard</h1><div id="msg"></div>
+<form id="lf"><label>Access code<input type="password" id="code" inputmode="numeric" required></label><button>Enter</button></form>
+<div id="out"></div>
+<script src="../config.js"></script><script>
+const e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+if(!API)msg.innerHTML='<p class="note">Preview mode: backend not connected yet.</p>';
+async function load(code,retry){const r=await(await fetch(API,{method:'POST',body:JSON.stringify({action:'list',code,retry:!!retry})})).json();
+ if(!r.ok){msg.innerHTML=`<p class="err">${e(r.error)}</p>`;sessionStorage.removeItem('c');lf.hidden=false;return;}
+ sessionStorage.setItem('c',code);lf.hidden=true;msg.innerHTML='';
+ out.innerHTML=`<p>${r.rows.length} submissions · <a href="#" id="rt">Retry pending AI</a> · <a href="#" id="lo">Log out</a></p><table><tr><th>#</th><th>Contact</th><th>Background</th><th>Feedback</th><th>Category</th><th>Severity</th><th>May contact</th></tr>`+
+ (r.rows.map(x=>`<tr class="sev-${e(x.severity)}"><td>${x.id}<br><small>${e(x.created_at)}</small></td><td>${e(x.name)}<br>${e(x.email)}<br>${e(x.phone)}</td>
+ <td>${e(x.relationship)}<br>Child in TCS: ${e(x.has_child||'—')}${x.schools?'<br>'+e(x.schools):''}${x.grades?'<br>Grades: '+e(x.grades):''}</td>
+ <td>${e(x.feedback)}${x.ai_reason?`<br><small><i>AI: ${e(x.ai_reason)}</i></small>`:''}</td><td>${e(x.category||'—')}${x.issue_type?`<br><small>picked: ${e(x.issue_type)}</small>`:''}</td>
+ <td>${x.ai_status==='done'?e(x.severity):'<span class="pending">pending AI</span>'}</td><td>${e(x.may_contact||'—')}${x.contact_method?'<br>'+e(x.contact_method):''}</td></tr>`).join('')||'<tr><td colspan=7>No submissions yet.</td></tr>')+'</table>';
+ rt.onclick=ev=>{ev.preventDefault();load(code,true)};lo.onclick=ev=>{ev.preventDefault();sessionStorage.removeItem('c');location.reload()};}
+lf.onsubmit=ev=>{ev.preventDefault();if(!API){msg.innerHTML='<p class="note">Preview mode: backend not connected, nothing to show.</p>';return;}load(code.value).catch(x=>msg.innerHTML=`<p class="err">${e(x.message)}</p>`)};
+if(API&&sessionStorage.getItem('c'))load(sessionStorage.getItem('c'));
+</script></body></html>

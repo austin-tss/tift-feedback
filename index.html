@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
+<title>Tift County Schools – Community Feedback</title><link rel="stylesheet" href="style.css"></head><body>
+<h1>Tift County Schools Community Feedback</h1><div id="msg"></div>
+<form id="f">
+<label>Name*<input name="name" required></label><label>Email*<input type="email" name="email" required></label><label>Phone*<input type="tel" name="phone" required></label>
+<fieldset><legend>About you</legend>
+<label>Relationship to the school system<select name="relationship"><option value="">Select…</option><option>Parent/Guardian</option><option>Student</option><option>Staff</option><option>Community member</option><option>Business owner</option><option>Other</option></select></label>
+<label>Do you have a child in Tift County Schools?<select name="has_child" id="hc"><option value="">Select…</option><option>Yes</option><option>No</option></select></label>
+<div id="kid" hidden><label>Which school(s)?</label><div class="chk" id="schools"></div><label>Grade level(s)</label><div class="chk" id="grades"></div></div></fieldset>
+<label>Issue type (optional)<select name="issue_type"><option value="">Not sure / let us decide</option><option value="sports">Sports</option><option value="education">Education</option><option value="safety">Safety</option><option value="facilities">Facilities</option><option value="transportation">Transportation</option><option value="other">Other</option></select></label>
+<label>Feedback*<textarea name="feedback" rows="6" required></textarea></label>
+<fieldset><legend>Follow-up (optional)</legend><label>May we contact you about this?<select name="may_contact" id="mc"><option value="">Select…</option><option>Yes</option><option>No</option></select></label>
+<div id="cm" hidden><label>Preferred contact method<select name="contact_method"><option value="">Select…</option><option>Email</option><option>Phone call</option><option>Text message</option></select></label></div></fieldset>
+<button id="b">Submit feedback</button></form>
+<script src="config.js"></script><script>
+const SCHOOLS=["Tift County High School","Eighth Street Middle School","J.T. Reddick School","Annie Belle Clark Primary","G.O. Bailey Primary","Len Lastinger Primary","Northside Primary","Charles Spencer Elementary","Matt Wilson Elementary","Omega Elementary","Sixth Street Academy","Tift County Pre-K / Northeast Campus","Other"],GRADES=["Pre-K","K","1","2","3","4","5","6","7","8","9","10","11","12"];
+const cb=(n,a)=>a.map(x=>`<label><input type="checkbox" name="${n}" value="${x}"> ${x}</label>`).join('');
+schools.innerHTML=cb('schools',SCHOOLS);grades.innerHTML=cb('grades',GRADES);
+hc.onchange=()=>kid.hidden=hc.value!=='Yes';mc.onchange=()=>cm.hidden=mc.value!=='Yes';
+if(!API)msg.innerHTML='<p class="note">Preview mode: the backend is not connected yet, so submissions are not saved.</p>';
+f.onsubmit=async e=>{e.preventDefault();const d=new FormData(f),o={action:'submit'};
+ for(const k of d.keys())o[k]=d.getAll(k).length>1||k==='schools'||k==='grades'?d.getAll(k):d.get(k);
+ if(o.has_child!=='Yes'){o.schools=[];o.grades=[];} if(o.may_contact!=='Yes')o.contact_method='';
+ if(!API){msg.innerHTML='<p class="note">Preview mode — not saved. (Backend not connected.)</p>';return;}
+ b.disabled=true;try{const r=await(await fetch(API,{method:'POST',body:JSON.stringify(o)})).json();if(!r.ok)throw Error(r.error||'Error');
+  document.body.innerHTML=`<h1>Thank you!</h1><p>Your feedback (reference #${r.id}) was received by Tift County Schools.</p><p><a href="./">Submit another</a></p>`;}
+ catch(err){msg.innerHTML=`<p class="err">${err.message}. Please try again.</p>`;b.disabled=false;}};
+</script></body></html>
