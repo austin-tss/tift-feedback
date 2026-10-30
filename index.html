@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light">
-<title>Tift County Schools – Community Feedback</title><link rel="stylesheet" href="style.css"></head><body>
+<title>Tift County Schools – Community Feedback</title><link rel="stylesheet" href="style.css"><style>.bspin{display:inline-block;width:14px;height:14px;border:3px solid #d6dde6;border-top-color:#1d4ed8;border-radius:50%;animation:sp .8s linear infinite;vertical-align:-2px;margin-right:6px}@keyframes sp{to{transform:rotate(360deg)}}</style></head><body>
 <h1>Tift County Schools Community Feedback</h1><div id="msg"></div>
 <form id="f">
 <label>Name*<input name="name" required></label><label>Email*<input type="email" name="email" required></label><label>Phone*<input type="tel" name="phone" required></label>
@@ -22,7 +22,7 @@ f.onsubmit=async e=>{e.preventDefault();const d=new FormData(f),o={action:'submi
  for(const k of d.keys())o[k]=d.getAll(k).length>1||k==='schools'||k==='grades'?d.getAll(k):d.get(k);
  if(o.has_child!=='Yes'){o.schools=[];o.grades=[];} if(o.may_contact!=='Yes')o.contact_method='';
  if(!API){msg.innerHTML='<p class="note">Preview mode — not saved. (Backend not connected.)</p>';return;}
- b.disabled=true;try{const r=await(await fetch(API,{method:'POST',body:JSON.stringify(o)})).json();if(!r.ok)throw Error(r.error||'Error');
+ b.disabled=true;b.innerHTML='<span class="bspin"></span>Sending…';try{const r=await(await fetch(API,{method:'POST',body:JSON.stringify(o)})).json();if(!r.ok)throw Error(r.error||'Error');
   document.body.innerHTML=`<h1>Thank you!</h1><p>Your feedback (reference #${r.id}) was received by Tift County Schools.</p><p><a href="./">Submit another</a></p>`;}
- catch(err){msg.innerHTML=`<p class="err">${err.message}. Please try again.</p>`;b.disabled=false;}};
+ catch(err){msg.innerHTML=`<p class="err">${err.message}. Please try again.</p>`;b.disabled=false;b.textContent='Submit feedback';}};
 </script></body></html>
